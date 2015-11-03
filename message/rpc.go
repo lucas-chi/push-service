@@ -71,12 +71,12 @@ func (r *MessageRPC) SavePrivates(m *myrpc.MessageSavePrivatesArgs, rw *myrpc.Me
 	if m == nil || m.Msg == nil || m.MsgId < 0 {
 		return myrpc.ErrParam
 	}
-	fkeys, err := UseStorage.SavePrivates(m.Keys, m.Msg, m.MsgId, m.Expire)
+	err := UseStorage.SavePrivates(m.Keys, m.Msg, m.MsgId, m.Expire)
 	if err != nil {
 		log.Error("UseStorage.SavePrivates(\"%v\", \"%s\", %d, %d) error(%v)", m.Keys, string(m.Msg), m.MsgId, m.Expire, err)
 	}
-	rw.FKeys = fkeys
-	log.Debug("UseStorage.SavePrivates(\"%v\", \"%s\", %d, %d) ok fkeys len(%d)", m.Keys, string(m.Msg), m.MsgId, m.Expire, len(fkeys))
+
+	log.Debug("UseStorage.SavePrivates(\"%v\", \"%s\", %d, %d) ok", m.Keys, string(m.Msg), m.MsgId, m.Expire)
 	return nil
 }
 

@@ -1,24 +1,7 @@
-// Copyright © 2014 Terry Mao, LiuDing All rights reserved.
-// This file is part of gopush-cluster.
-
-// gopush-cluster is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-
-// gopush-cluster is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License
-// along with gopush-cluster.  If not, see <http://www.gnu.org/licenses/>.
-
 package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/lucas-chi/push-service/conf"
 	"runtime"
 	"time"
@@ -48,9 +31,7 @@ type Config struct {
 	RedisMaxIdle     int               `goconf:"redis:idle"`
 	RedisMaxActive   int               `goconf:"redis:active"`
 	RedisMaxStore    int               `goconf:"redis:store"`
-	MySQLClean       time.Duration     `goconf:"mysql:clean:time"`
-	RedisSource      map[string]string `goconf:"-"`
-	MySQLSource      map[string]string `goconf:"-"`
+	RedisAddr      	 string 			`goconf:"-"`
 	// zookeeper
 	ZookeeperAddr    []string      `goconf:"zookeeper:addr:,"`
 	ZookeeperTimeout time.Duration `goconf:"zookeeper:timeout:time"`
@@ -80,7 +61,7 @@ func InitConfig() error {
 		RedisMaxIdle:     50,
 		RedisMaxActive:   1000,
 		RedisMaxStore:    20,
-		RedisSource:      make(map[string]string),
+		RedisAddr:        "",
 		// zookeeper
 		ZookeeperAddr:    []string{"localhost:2181"},
 		ZookeeperTimeout: 30 * time.Second,
@@ -88,17 +69,6 @@ func InitConfig() error {
 	}
 	if err := gconf.Unmarshal(Conf); err != nil {
 		return err
-	}
-	// redis section
-	redisAddrsSec := gconf.Get("redis.source")
-	if redisAddrsSec != nil {
-		for _, key := range redisAddrsSec.Keys() {
-			addr, err := redisAddrsSec.String(key)
-			if err != nil {
-				return fmt.Errorf("config section: \"redis.addrs\" key: \"%s\" error(%v)", key, err)
-			}
-			Conf.RedisSource[key] = addr
-		}
 	}
 	return nil
 }

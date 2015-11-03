@@ -58,7 +58,7 @@ type RedisStorage struct {
 func NewRedisStorage() *RedisStorage {
 	redisPool := map[string]*redis.Pool{}
 	ring := ketama.NewRing(ketamaBase)
-	reg := regexp.MustCompile("(.+)@(.+)#(.+)|(.+)@(.+)")
+	reg := regexp.MustCompile("(.+)@(.+)")
 	for n, addr := range Conf.RedisSource {
 		nw := strings.Split(n, ":")
 		if len(nw) != 2 {

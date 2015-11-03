@@ -20,7 +20,7 @@ import (
 	log "code.google.com/p/log4go"
 	"errors"
 	"flag"
-	"github.com/lucas-chi/goconf"
+	"github.com/lucas-chi/push-service/conf"
 )
 
 var (

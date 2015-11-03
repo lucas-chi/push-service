@@ -19,7 +19,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/lucas-chi/goconf"
+	"github.com/lucas-chi/push-service/conf"
 	"runtime"
 	"time"
 )
@@ -59,7 +59,7 @@ type Config struct {
 
 // NewConfig parse config file into Config.
 func InitConfig() error {
-	gconf := goconf.New()
+	gconf := conf.New()
 	if err := gconf.Parse(confFile); err != nil {
 		return err
 	}

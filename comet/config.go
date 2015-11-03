@@ -18,7 +18,7 @@ package main
 
 import (
 	"flag"
-	"github.com/lucas-chi/goconf"
+	"github.com/lucas-chi/push-service/conf"
 	"runtime"
 	"time"
 )
@@ -101,7 +101,7 @@ func InitConfig() error {
 		ChannelBucket:           runtime.NumCPU(),
 		MsgBufNum:               30,
 	}
-	c := goconf.New()
+	c := conf.New()
 	if err := c.Parse(confFile); err != nil {
 		return err
 	}

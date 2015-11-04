@@ -48,7 +48,7 @@ func InitConfig(file string) (*Config, error) {
 		Key:       "lucas-chi",
 		Heartbeat: 30,
 	}
-	c := goconf.New()
+	c := conf.New()
 	if err := c.Parse(file); err != nil {
 		log.Error("goconf.Parse(\"%s\") failed (%s)", file, err.Error())
 		return nil, err

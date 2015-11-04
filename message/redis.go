@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"regexp"
 	"time"
-
 	log "code.google.com/p/log4go"
 	myrpc "github.com/lucas-chi/push-service/rpc"
 	"github.com/garyburd/redigo/redis"
@@ -36,6 +35,7 @@ type RedisStorage struct {
 
 // NewRedis initialize the redis pool.
 func NewRedisStorage() *RedisStorage {
+	log.Debug("RedisAddr : %s", Conf.RedisAddr)
 	reg := regexp.MustCompile("(.+)@(.+)")
 	pw := reg.FindStringSubmatch(Conf.RedisAddr)
 	

@@ -31,7 +31,7 @@ type Config struct {
 	RedisMaxIdle     int               `goconf:"redis:idle"`
 	RedisMaxActive   int               `goconf:"redis:active"`
 	RedisMaxStore    int               `goconf:"redis:store"`
-	RedisAddr      	 string 			`goconf:"-"`
+	RedisAddr      	 string 		   `goconf:"redis:addr"`
 	// zookeeper
 	ZookeeperAddr    []string      `goconf:"zookeeper:addr:,"`
 	ZookeeperTimeout time.Duration `goconf:"zookeeper:timeout:time"`
@@ -61,12 +61,13 @@ func InitConfig() error {
 		RedisMaxIdle:     50,
 		RedisMaxActive:   1000,
 		RedisMaxStore:    20,
-		RedisAddr:        "",
+		//RedisAddr:        "tcp@10.113.199.244:21379",
 		// zookeeper
 		ZookeeperAddr:    []string{"localhost:2181"},
 		ZookeeperTimeout: 30 * time.Second,
 		ZookeeperPath:    "/gopush-cluster-message",
 	}
+	
 	if err := gconf.Unmarshal(Conf); err != nil {
 		return err
 	}

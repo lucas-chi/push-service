@@ -63,6 +63,7 @@ func (c *Config) ParseReader(reader io.Reader) error {
 		section  *Section
 		rd       = bufio.NewReader(reader)
 	)
+	
 	for {
 		line++
 		row, err = rd.ReadString(CRLF)
@@ -124,6 +125,7 @@ func (c *Config) ParseReader(reader io.Reader) error {
 		section.dataOrder = append(section.dataOrder, key)
 		// clean comments
 		comments = []string{}
+		
 	}
 	return nil
 }

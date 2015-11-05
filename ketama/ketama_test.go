@@ -1,3 +1,5 @@
+// refer to https://github.com/mncaudill/ketama
+
 package ketama
 
 import (

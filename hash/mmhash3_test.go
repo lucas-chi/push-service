@@ -1,4 +1,3 @@
-// Copyright (c) 2012 The Go Authors. All rights reserved.
 // refer https://github.com/gwenn/murmurhash3
 
 package hash

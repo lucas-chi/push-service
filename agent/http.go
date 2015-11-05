@@ -19,7 +19,6 @@ package main
 import (
 	log "code.google.com/p/log4go"
 	"encoding/json"
-	"fmt"
 	"net"
 	"net/http"
 	"time"
@@ -29,25 +28,19 @@ import (
 func StartHTTP() {
 	// external
 	httpServeMux := http.NewServeMux()
-	// 2
-	httpServeMux.HandleFunc("/2/server/get", GetServer2)
+
 	// 1.0
 	httpServeMux.HandleFunc("/1/server/get", GetServer)
 	httpServeMux.HandleFunc("/1/msg/get", GetOfflineMsg)
 	httpServeMux.HandleFunc("/1/time/get", GetTime)
-	// old
-	httpServeMux.HandleFunc("/server/get", GetServer0)
-	httpServeMux.HandleFunc("/msg/get", GetOfflineMsg0)
-	httpServeMux.HandleFunc("/time/get", GetTime0)
+	
 	// internal
 	httpAdminServeMux := http.NewServeMux()
 	// 1.0
 	httpAdminServeMux.HandleFunc("/1/admin/push/private", PushPrivate)
 	httpAdminServeMux.HandleFunc("/1/admin/push/mprivate", PushMultiPrivate)
 	httpAdminServeMux.HandleFunc("/1/admin/msg/del", DelPrivate)
-	// old
-	httpAdminServeMux.HandleFunc("/admin/push", PushPrivate)
-	httpAdminServeMux.HandleFunc("/admin/msg/clean", DelPrivate)
+
 	for _, bind := range Conf.HttpBind {
 		log.Info("start http listen addr:\"%s\"", bind)
 		go httpListen(httpServeMux, bind)
@@ -73,20 +66,14 @@ func httpListen(mux *http.ServeMux, bind string) {
 }
 
 // retWrite marshal the result and write to client(get).
-func retWrite(w http.ResponseWriter, r *http.Request, res map[string]interface{}, callback string, start time.Time) {
+func retWrite(w http.ResponseWriter, r *http.Request, res map[string]interface{}, start time.Time) {
 	data, err := json.Marshal(res)
 	if err != nil {
 		log.Error("json.Marshal(\"%v\") error(%v)", res, err)
 		return
 	}
-	dataStr := ""
-	if callback == "" {
-		// Normal json
-		dataStr = string(data)
-	} else {
-		// Jsonp
-		dataStr = fmt.Sprintf("%s(%s)", callback, string(data))
-	}
+	dataStr := string(data)
+
 	if n, err := w.Write([]byte(dataStr)); err != nil {
 		log.Error("w.Write(\"%s\") error(%v)", dataStr, err)
 	} else {

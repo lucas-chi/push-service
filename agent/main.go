@@ -29,7 +29,7 @@ func main() {
 	var err error
 	// Parse cmd-line arguments
 	flag.Parse()
-	log.Info("web ver: \"%s\" start", ver.Version)
+	log.Info("agent ver: \"%s\" start", ver.Version)
 	if err = InitConfig(); err != nil {
 		panic(err)
 	}

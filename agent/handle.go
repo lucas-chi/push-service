@@ -29,36 +29,17 @@ const (
 	tcpProto = "2"
 )
 
-// getProtoAddr get specified protocol addresss.
-func getProtoAddr(node *myrpc.CometNodeInfo, p string) (addrs []string, ret int) {
-	if p == wsProto {
-		addrs = node.WsAddr
-	} else if p == tcpProto {
-		addrs = node.TcpAddr
-	} else {
-		ret = ParamErr
-		return
-	}
-	if len(addrs) == 0 {
-		ret = NotFoundServer
-		return
-	}
-	ret = OK
-	return
-}
-
 // GetServer handle for server get
-func GetServer0(w http.ResponseWriter, r *http.Request) {
+func GetServer(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method Not Allowed", 405)
 		return
 	}
 	params := r.URL.Query()
-	key := params.Get("key")
-	callback := params.Get("callback")
-	protoStr := params.Get("proto")
-	res := map[string]interface{}{"ret": OK, "msg": "ok"}
-	defer retWrite(w, r, res, callback, time.Now())
+	key := params.Get("k")
+	protoStr := params.Get("p")
+	res := map[string]interface{}{"ret": OK}
+	defer retWrite(w, r, res, time.Now())
 	if key == "" {
 		res["ret"] = ParamErr
 		return
@@ -79,17 +60,16 @@ func GetServer0(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetOfflineMsg get offline mesage http handler.
-func GetOfflineMsg0(w http.ResponseWriter, r *http.Request) {
+func GetOfflineMsg(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method Not Allowed", 405)
 		return
 	}
 	params := r.URL.Query()
-	key := params.Get("key")
-	midStr := params.Get("mid")
-	callback := params.Get("callback")
-	res := map[string]interface{}{"ret": OK, "msg": "ok"}
-	defer retWrite(w, r, res, callback, time.Now())
+	key := params.Get("k")
+	midStr := params.Get("m")
+	res := map[string]interface{}{"ret": OK}
+	defer retWrite(w, r, res, time.Now())
 	if key == "" || midStr == "" {
 		res["ret"] = ParamErr
 		return
@@ -105,6 +85,7 @@ func GetOfflineMsg0(w http.ResponseWriter, r *http.Request) {
 	args := &myrpc.MessageGetPrivateArgs{MsgId: mid, Key: key}
 	client := myrpc.MessageRPC.Get()
 	if client == nil {
+		log.Error("no message node found")
 		res["ret"] = InternalErr
 		return
 	}
@@ -113,36 +94,42 @@ func GetOfflineMsg0(w http.ResponseWriter, r *http.Request) {
 		res["ret"] = InternalErr
 		return
 	}
-	omsgs := []string{}
-	opmsgs := []string{}
-	for _, msg := range reply.Msgs {
-		omsg, err := msg.OldBytes()
-		if err != nil {
-			res["ret"] = InternalErr
-			return
-		}
-		omsgs = append(omsgs, string(omsg))
-	}
-
-	if len(omsgs) == 0 {
+	if len(reply.Msgs) == 0 {
 		return
 	}
-
-	res["data"] = map[string]interface{}{"msgs": omsgs, "pmsgs": opmsgs}
+	res["data"] = map[string]interface{}{"msgs": reply.Msgs}
 	return
 }
 
 // GetTime get server time http handler.
-func GetTime0(w http.ResponseWriter, r *http.Request) {
+func GetTime(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method Not Allowed", 405)
 		return
 	}
-	params := r.URL.Query()
-	callback := params.Get("callback")
-	res := map[string]interface{}{"ret": OK, "msg": "ok"}
+	//params := r.URL.Query()
+	res := map[string]interface{}{"ret": OK}
 	now := time.Now()
-	defer retWrite(w, r, res, callback, now)
+	defer retWrite(w, r, res, now)
 	res["data"] = map[string]interface{}{"timeid": now.UnixNano() / 100}
+	return
+}
+
+
+// getProtoAddr get specified protocol addresss.
+func getProtoAddr(node *myrpc.CometNodeInfo, p string) (addrs []string, ret int) {
+	if p == wsProto {
+		addrs = node.WsAddr
+	} else if p == tcpProto {
+		addrs = node.TcpAddr
+	} else {
+		ret = ParamErr
+		return
+	}
+	if len(addrs) == 0 {
+		ret = NotFoundServer
+		return
+	}
+	ret = OK
 	return
 }

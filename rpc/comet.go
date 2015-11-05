@@ -37,7 +37,7 @@ type CometNodeInfo struct {
 	TcpAddr []string `json:"tcp"`
 	WsAddr  []string `json:"ws"`
 	Weight  int      `json:"weight"`
-	Rpc     *RandLB  `json:"-"`
+	Rpc     *WeightRpc `json:"-"`
 }
 
 type CometNodeEvent struct {
@@ -160,7 +160,7 @@ func handleCometNodeEvent(conn *zk.Conn, migrateLockPath, fpath string, retry, p
 		// if node update, after reuse rpc connection, this will clean the resource
 		if info, ok := cometNodeInfoMap[ev.Key]; ok {
 			if info != nil && info.Rpc != nil {
-				info.Rpc.Destroy()
+				info.Rpc.Close()
 			}
 		}
 		// update comet hash, cause node has changed
@@ -211,7 +211,7 @@ func notifyMigrate(conn *zk.Conn, migrateLockPath, znode, key string, update boo
 				wg.Done()
 				return
 			}
-			r := info.Rpc.Get()
+			r := info.Rpc
 			if r == nil {
 				log.Error("notify migrate failed, no rpc found, node:%s", n)
 				wg.Done()
@@ -306,35 +306,25 @@ func registerCometNode(conn *zk.Conn, node, fpath string, retry, ping time.Durat
 	}
 	// get old node info for finding the old rpc connection
 	oldInfo := cometNodeInfoMap[node]
+	
 	// init comet rpc
-	clients := make(map[string]*WeightRpc, len(info.RpcAddr))
-	for _, addr := range info.RpcAddr {
-		var (
-			r *rpc.Client
-		)
-		if oldInfo != nil && oldInfo.Rpc != nil {
-			if wr, ok := oldInfo.Rpc.Clients[addr]; ok && wr.Client != nil {
-				// reuse the rpc connection must let old client = nil, avoid reclose rpc.
-				oldInfo.Rpc.Clients[addr].Client = nil
-				r = wr.Client
-			}
+	var (
+		r *rpc.Client
+	)
+	
+	// create rpc client connection
+	if oldInfo == nil || oldInfo.Rpc == nil {
+		addr := info.RpcAddr[0]
+		
+		if r, err = rpc.Dial("tcp", addr); err != nil {
+			log.Error("rpc.Dial(\"%s\") error(%v)", addr, err)
+			return
 		}
-		if r == nil {
-			if r, err = rpc.Dial("tcp", addr); err != nil {
-				log.Error("rpc.Dial(\"%s\") error(%v)", addr, err)
-				return
-			}
-			log.Debug("node:%s addr:%s rpc reconnect", node, addr)
-		}
-		clients[addr] = &WeightRpc{Weight: 1, Addr: addr, Client: r}
+		
+		log.Debug("node:%s addr:%s rpc reconnect", node, addr)
+		info.Rpc = &WeightRpc{Weight: 1, Addr: addr, Client: r}
 	}
-	// comet rpc use rand load balance
-	lb, err := NewRandLB(clients, cometService, retry, ping, startPing)
-	if err != nil {
-		log.Error("NewRandLR() error(%v)", err)
-		return
-	}
-	info.Rpc = lb
+	
 	log.Info("zk path: \"%s\" register nodes: \"%s\"", fpath, node)
 	return
 }

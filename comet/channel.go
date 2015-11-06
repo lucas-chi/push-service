@@ -115,14 +115,12 @@ func (l *ChannelList) New(key string) (Channel, *ChannelBucket, error) {
 	b.Lock()
 	if c, ok := b.Data[key]; ok {
 		b.Unlock()
-		//ChStat.IncrAccess()
 		log.Info("user_key:\"%s\" refresh channel bucket expire time", key)
 		return c, b, nil
 	} else {
 		c = NewSeqChannel()
 		b.Data[key] = c
 		b.Unlock()
-		//ChStat.IncrCreate()
 		log.Info("user_key:\"%s\" create a new channel", key)
 		return c, b, nil
 	}
@@ -142,7 +140,6 @@ func (l *ChannelList) Get(key string, newOne bool) (Channel, error) {
 			c = NewSeqChannel()
 			b.Data[key] = c
 			b.Unlock()
-			//ChStat.IncrCreate()
 			log.Info("user_key:\"%s\" create a new channel", key)
 			return c, nil
 		} else {
@@ -152,7 +149,6 @@ func (l *ChannelList) Get(key string, newOne bool) (Channel, error) {
 		}
 	} else {
 		b.Unlock()
-		//ChStat.IncrAccess()
 		log.Info("user_key:\"%s\" refresh channel bucket expire time", key)
 		return c, nil
 	}

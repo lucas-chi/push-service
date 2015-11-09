@@ -69,6 +69,7 @@ func websocketListen(bind string) {
 
 // Subscriber Handle is the websocket handle for sub request.
 func SubscribeHandle(ws *websocket.Conn) {
+	log.Debug("connected to websocket...")
 	addr := ws.Request().RemoteAddr
 	params := ws.Request().URL.Query()
 	// get subscriber key

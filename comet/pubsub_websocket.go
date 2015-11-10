@@ -52,7 +52,10 @@ func websocketListen(bind string) {
 		httpServeMux = http.NewServeMux()
 		err error
 	)
-	httpServeMux.Handle("/sub", websocket.Handler(SubscribeHandle))
+	httpServeMux.HandleFunc("/sub", func(w http.ResponseWriter, req *http.Request) {
+        s := websocket.Server{Handler: websocket.Handler(SubscribeHandle)}
+        s.ServeHTTP(w, req)
+    })
 	
 	if addr, err = net.ResolveTCPAddr("tcp4", bind); err != nil {
 			log.Error("net.ResolveTCPAddr(\"tcp4\", \"%s\") error(%v)", bind, err)

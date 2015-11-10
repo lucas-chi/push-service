@@ -20,6 +20,7 @@ func PushPrivate(w http.ResponseWriter, r *http.Request) {
 	}
 	body := ""
 	res := map[string]interface{}{"ret": OK}
+	w.Header().Add("Access-Control-Allow-Origin", "*")
 	defer retPWrite(w, r, res, &body, time.Now())
 	// param
 	bodyBytes, err := ioutil.ReadAll(r.Body)

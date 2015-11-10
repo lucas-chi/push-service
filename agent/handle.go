@@ -22,8 +22,9 @@ func GetServer(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	key := params.Get("k")
 	protoStr := params.Get("p")
+	callback := params.Get("cb")
 	res := map[string]interface{}{"ret": OK}
-	defer retWrite(w, r, res, time.Now())
+	defer retWrite(w, r, res, callback, time.Now())
 	if key == "" {
 		res["ret"] = ParamErr
 		return
@@ -52,8 +53,9 @@ func GetOfflineMsg(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	key := params.Get("k")
 	midStr := params.Get("m")
+	callback := params.Get("cb")
 	res := map[string]interface{}{"ret": OK}
-	defer retWrite(w, r, res, time.Now())
+	defer retWrite(w, r, res, callback, time.Now())
 	if key == "" || midStr == "" {
 		res["ret"] = ParamErr
 		return
@@ -91,10 +93,11 @@ func GetTime(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method Not Allowed", 405)
 		return
 	}
-	//params := r.URL.Query()
+	params := r.URL.Query()
 	res := map[string]interface{}{"ret": OK}
 	now := time.Now()
-	defer retWrite(w, r, res, now)
+	callback := params.Get("cb")
+	defer retWrite(w, r, res, callback, now)
 	res["data"] = map[string]interface{}{"timeid": now.UnixNano() / 100}
 	return
 }

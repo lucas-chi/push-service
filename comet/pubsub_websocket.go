@@ -2,7 +2,6 @@
 package main
 
 import (
-	// TODO change the 3rd websocket lib
 	"golang.org/x/net/websocket"
 	log "code.google.com/p/log4go"
 	"net"

@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"time"
+	"fmt"
 )
 
 // StartHTTP start listen http.
@@ -51,14 +52,20 @@ func httpListen(mux *http.ServeMux, bind string) {
 }
 
 // retWrite marshal the result and write to client(get).
-func retWrite(w http.ResponseWriter, r *http.Request, res map[string]interface{}, start time.Time) {
+func retWrite(w http.ResponseWriter, r *http.Request, res map[string]interface{}, callback string, start time.Time) {
 	data, err := json.Marshal(res)
 	if err != nil {
 		log.Error("json.Marshal(\"%v\") error(%v)", res, err)
 		return
 	}
-	dataStr := string(data)
-
+	dataStr := ""
+	if callback == "" {
+		// Normal json
+		dataStr = string(data)
+	} else {
+		// Jsonp
+		dataStr = fmt.Sprintf("%s(%s)", callback, string(data))
+	}
 	if n, err := w.Write([]byte(dataStr)); err != nil {
 		log.Error("w.Write(\"%s\") error(%v)", dataStr, err)
 	} else {

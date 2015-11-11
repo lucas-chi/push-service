@@ -17,6 +17,7 @@ func StartHTTP() {
 
 	// 1.0
 	httpServeMux.HandleFunc("/1/server/get", GetServer)
+	httpServeMux.HandleFunc("/1/server/chat/get", GetChatServer)
 	httpServeMux.HandleFunc("/1/msg/get", GetOfflineMsg)
 	httpServeMux.HandleFunc("/1/time/get", GetTime)
 	

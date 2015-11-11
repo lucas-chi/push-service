@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"code.google.com/p/go-uuid/uuid"
 )
 
 const (
@@ -41,6 +42,35 @@ func GetServer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	res["data"] = map[string]interface{}{"server": addrs[0]}
+	return
+}
+
+func GetChatServer(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method Not Allowed", 405)
+		return
+	}
+	params := r.URL.Query()
+	protoStr := params.Get("p")
+	callback := params.Get("cb")
+	res := map[string]interface{}{"ret": OK}
+	defer retWrite(w, r, res, callback, time.Now())
+	
+	sessionId := uuid.New();
+	log.Debug("generated sessionId <%s> for chat user", sessionId)
+
+	// Match a push-server with the value computed through ketama algorithm
+	node := myrpc.GetComet(sessionId)
+	if node == nil {
+		res["ret"] = NotFoundServer
+		return
+	}
+	addrs, ret := getProtoAddr(node, protoStr)
+	if ret != OK {
+		res["ret"] = ret
+		return
+	}
+	res["data"] = map[string]interface{}{"server": addrs[0], "sessionId" : sessionId}
 	return
 }
 

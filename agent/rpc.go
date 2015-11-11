@@ -16,7 +16,7 @@ var (
 )
 
 // Agent start rpc listen.
-func StartRPC() error {
+func InitRPC() error {
 	c := &AgentRPC{}
 	rpc.Register(c)
 	for _, bind := range Conf.RPCBind {

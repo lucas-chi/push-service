@@ -23,6 +23,12 @@ func main() {
 	// init log
 	log.LoadConfiguration(Conf.Log)
 	defer log.Close()
+	
+	// init rpc service
+	if err = InitRPC(); err != nil {
+		panic(err)
+	}
+	
 	// init zookeeper
 	zkConn, err := InitZK()
 	if err != nil {

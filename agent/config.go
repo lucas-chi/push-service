@@ -15,7 +15,7 @@ var (
 
 // InitConfig initialize config file path
 func init() {
-	flag.StringVar(&confFile, "c", "./web.conf", " set web config file path")
+	flag.StringVar(&confFile, "c", "./web.conf", " set agent config file path")
 }
 
 type Config struct {
@@ -33,8 +33,12 @@ type Config struct {
 	ZookeeperCometPath   string        `goconf:"zookeeper:comet.path"`
 	ZookeeperMessagePath string        `goconf:"zookeeper:message.path"`
 	ZookeeperMigratePath string        `goconf:"zookeeper:migrate.path"`
+	ZookeeperAgentPath   string		   `goconf:"zookeeper:agent.path"`
+	ZookeeperAgentNode   string		   `goconf:"zookeeper:agent.node"`
+	ZookeeperAgentNodeWeight int	   `goconf:"zookeeper:agent.nodeweight"`
 	RPCRetry             time.Duration `goconf:"rpc:retry:time"`
 	RPCPing              time.Duration `goconf:"rpc:ping:time"`
+	RPCBind				 []string  	   `goconf:"rpc:bind"`
 }
 
 // InitConfig init configuration file.
@@ -59,8 +63,12 @@ func InitConfig() error {
 		ZookeeperCometPath:   "/gopush-cluster-comet",
 		ZookeeperMessagePath: "/gopush-cluster-message",
 		ZookeeperMigratePath: "/gopush-migrate-lock",
+		ZookeeperAgentPath: "/gopush-cluster-agent",
+		ZookeeperAgentNode: "node1",
+		ZookeeperAgentNodeWeight: 1,
 		RPCRetry:             3 * time.Second,
 		RPCPing:              1 * time.Second,
+		RPCBind:            []string{"localhost:8191"},
 	}
 	if err := gconf.Unmarshal(Conf); err != nil {
 		return err

@@ -4,6 +4,7 @@ package main
 import (
 	"golang.org/x/net/websocket"
 	log "code.google.com/p/log4go"
+	myrpc "github.com/lucas-chi/push-service/rpc"
 	"net"
 	"net/http"
 	"strconv"
@@ -121,6 +122,13 @@ func SubscribeHandle(ws *websocket.Conn) {
 		log.Error("<%s> user_key:\"%s\" add conn error(%v)", addr, key, err)
 		return
 	}
+	
+	// reply welcome message
+	args := &myrpc.MessageReplyArgs{SessionId : key, Msg : nil, NewSession : true}
+	client := myrpc.AgentRPC.Get()
+	ret := 0
+	client.Call(myrpc.AgentServiceReply, args, &ret);
+	
 	// blocking wait client heartbeat
 	reply := ""
 	begin := time.Now().UnixNano()

@@ -36,6 +36,7 @@ type Config struct {
 	ZookeeperCometNode   string        `goconf:"zookeeper:comet.node"`
 	ZookeeperCometWeight int           `goconf:"zookeeper:comet.weight"`
 	ZookeeperMessagePath string        `goconf:"zookeeper:message.path"`
+	ZookeeperAgentPath string          `goconf:"zookeeper:agent.path"`
 	// rpc
 	RPCPing  time.Duration `goconf:"rpc:ping:time"`
 	RPCRetry time.Duration `goconf:"rpc:retry:time"`
@@ -72,6 +73,7 @@ func InitConfig() error {
 		ZookeeperCometNode:   "node1",
 		ZookeeperCometWeight: 1,
 		ZookeeperMessagePath: "/gopush-cluster-message",
+		ZookeeperAgentPath: "/gopush-cluster-agent",
 		// rpc
 		RPCPing:  1 * time.Second,
 		RPCRetry: 1 * time.Second,

@@ -46,5 +46,6 @@ func InitZK() (*zk.Conn, error) {
 	}
 	// watch and update
 	rpc.InitMessage(conn, Conf.ZookeeperMessagePath, Conf.RPCRetry, Conf.RPCPing)
+	rpc.InitAgent(conn, Conf.ZookeeperAgentPath, Conf.RPCRetry, Conf.RPCPing)
 	return conn, nil
 }

@@ -102,7 +102,6 @@ func GetTime(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-
 // getProtoAddr get specified protocol addresss.
 func getProtoAddr(node *myrpc.CometNodeInfo, p string) (addrs []string, ret int) {
 	if p == wsProto {

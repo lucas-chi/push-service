@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"encoding/json"
 )
 
 type KeepAliveListener struct {
@@ -154,8 +155,10 @@ func SubscribeHandle(ws *websocket.Conn) {
 				break
 			}
 			log.Debug("<%s> user_key:\"%s\" receive heartbeat", addr, key)
-		} else {
-			log.Warn("<%s> user_key:\"%s\" unknown heartbeat protocol", addr, key)
+		} else { // reply user message
+			args := &myrpc.MessageReplyArgs{SessionId : key, Msg : json.RawMessage(reply), NewSession : false}
+			client.Call(myrpc.AgentServiceReply, args, &ret);
+			log.Debug("<%s> user_key:\"%s\" received message : \"%s\"", addr, key, reply)
 			break
 		}
 		end = time.Now().UnixNano()

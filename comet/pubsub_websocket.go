@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"code.google.com/p/go-uuid/uuid"
 )
 
 type KeepAliveListener struct {
@@ -82,11 +83,14 @@ func SubscribeHandle(ws *websocket.Conn) {
 	params := ws.Request().URL.Query()
 	// get subscriber key
 	key := params.Get("key")
+	
+	// generate SessionId as key(client id)
 	if key == "" {
-		ws.Write(ParamReply)
-		log.Warn("<%s> key param error", addr)
-		return
+		log.Warn("<%s> key param is empty", addr)
+		key = uuid.New();
+		log.Warn("<%s> generated uuid : %s as key", addr, key)
 	}
+	
 	// get heartbeat second
 	heartbeatStr := params.Get("heartbeat")
 	i, err := strconv.Atoi(heartbeatStr)

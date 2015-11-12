@@ -84,3 +84,9 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 	}
 	return nil
 }
+
+// Server Ping interface
+func (r *AgentRPC) Ping(p int, ret *int) error {
+	log.Debug("ping ok")
+	return nil
+}

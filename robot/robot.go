@@ -25,5 +25,5 @@ func FindReply(msg string) string {
 }
 
 func Welcome() string {
-	return "尊敬的用户，竭诚为您服务！"
+	return "尊敬的用户，我将竭诚为您服务！"
 }

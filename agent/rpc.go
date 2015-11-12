@@ -83,16 +83,15 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 		//reply = robot.FindReply(string(args.Msg))
 		
 		key := fmt.Sprintf("%s.%s", USERMSG_NAMESPACE, args.SessionId)
+		messageClient := myrpc.MessageRPC.Get()
 		
 		// save user message
-		messageClient := myrpc.MessageRPC.Get()
 		saveArgs := &myrpc.MessageSavePrivateArgs{Key: key, Msg: args.Msg, MsgId: id.Get(), Expire: USERMSG_EXPIRE}
 		
 		if err := messageClient.Call(myrpc.MessageServiceSavePrivate, saveArgs, &ret); err != nil {
 			log.Error("client.Call(\"%s\", \"%v\", &ret) error(%v)", myrpc.MessageServiceSavePrivate, saveArgs, err)
 			return err
 		}
-		
 		
 		// get user message history
 		getArgs := &myrpc.MessageGetPrivateArgs{MsgId: 0, Key: key}

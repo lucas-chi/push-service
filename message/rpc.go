@@ -94,38 +94,6 @@ func (r *MessageRPC) DelPrivate(key string, ret *int) error {
 	return nil
 }
 
-/*
-// SavePublish rpc interface save publish message.
-func (r *MessageRPC) SavePublish(m *myrpc.MessageSaveGroupArgs, ret *int) error {
-	return nil
-}
-
-// GetPublish rpc interface get publish message.
-func (r *MessageRPC) GetPublish(m *myrpc.MessageGetGroupArgs, rw *myrpc.MessageGetResp) error {
-	return nil
-}
-
-// DelPublish rpc interface delete publish message.
-func (r *MessageRPC) DelPublish(key string, ret *int) error {
-	return nil
-}
-
-// SaveGroup rpc interface save publish message.
-func (r *MessageRPC) SaveGroup(m *myrpc.MessageSaveGroupArgs, ret *int) error {
-	return nil
-}
-
-// GetPublish rpc interface get publish message.
-func (r *MessageRPC) GetGroup(m *myrpc.MessageGetGroupArgs, rw *myrpc.MessageGetResp) error {
-	return nil
-}
-
-// DelPublish rpc interface delete publish message.
-func (r *MessageRPC) DelGroup(key string, ret *int) error {
-	return nil
-}
-*/
-
 // Server Ping interface
 func (r *MessageRPC) Ping(p int, ret *int) error {
 	log.Debug("ping ok")

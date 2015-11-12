@@ -5,10 +5,17 @@ import (
 	log "code.google.com/p/log4go"
 	"errors"
 	myrpc "github.com/lucas-chi/push-service/rpc"
+	"github.com/lucas-chi/push-service/id"
 	"net"
 	"net/rpc"
 	"encoding/json"
 	"github.com/lucas-chi/push-service/robot"
+	"fmt"
+)
+
+const (
+	USERMSG_NAMESPACE string = "userMsg"
+	USERMSG_EXPIRE uint = 3600 * 10
 )
 
 var (
@@ -61,9 +68,9 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 	if node == nil || node.Rpc == nil {
 		return ErrCometNodeNotExist
 	}
-	client := node.Rpc
+	cometClient := node.Rpc
 	
-	if client == nil {
+	if cometClient == nil {
 		return ErrCometNodeNotExist
 	}
 	
@@ -73,15 +80,46 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 	if args.NewSession {
 		reply = robot.Welcome()
 	} else {
-		reply = robot.FindReply(string(args.Msg))
+		//reply = robot.FindReply(string(args.Msg))
+		
+		key := fmt.Sprintf("%s.%s", USERMSG_NAMESPACE, args.SessionId)
+		
+		// save user message
+		messageClient := myrpc.MessageRPC.Get()
+		saveArgs := &myrpc.MessageSavePrivateArgs{Key: key, Msg: args.Msg, MsgId: id.Get(), Expire: USERMSG_EXPIRE}
+		
+		if err := messageClient.Call(myrpc.MessageServiceSavePrivate, saveArgs, &ret); err != nil {
+			log.Error("client.Call(\"%s\", \"%v\", &ret) error(%v)", myrpc.MessageServiceSavePrivate, saveArgs, err)
+			return err
+		}
+		
+		
+		// get user message history
+		getArgs := &myrpc.MessageGetPrivateArgs{MsgId: 0, Key: key}
+		getResp := &myrpc.MessageGetResp{}
+		
+		if err := messageClient.Call(myrpc.MessageServiceGetPrivate, getArgs, getResp); err != nil {
+			log.Error("client.Call(\"%s\", \"%v\", getResp) error(%v)", myrpc.MessageServiceGetPrivate, getArgs, err)
+			return err
+		}
+		
+		byteJson, err :=json.Marshal(getResp)
+		if err != nil {
+			log.Error("json.Marshal(%v) error(%v)", getResp, err)
+			return err
+		}
+		
+		reply = string(byteJson)
 	}
 	
 	pushArgs := &myrpc.CometPushPrivateArgs{Msg: json.RawMessage(reply), Expire: 0, Key: args.SessionId}
+	log.Debug("reply to session id:<%s> , message:\"%s\"", args.SessionId, reply)
 	
-	if err := client.Call(myrpc.CometServicePushPrivate, pushArgs, &ret); err != nil {
+	if err := cometClient.Call(myrpc.CometServicePushPrivate, pushArgs, &ret); err != nil {
 		log.Error("client.Call(\"%s\", \"%s\", &ret) error(%v)", myrpc.CometServicePushPrivate, pushArgs.Key, err)
 		return ErrInternal
 	}
+	
 	return nil
 }
 

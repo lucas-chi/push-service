@@ -159,7 +159,7 @@ func SubscribeHandle(ws *websocket.Conn) {
 			args := &myrpc.MessageReplyArgs{SessionId : key, Msg : json.RawMessage(reply), NewSession : false}
 			client.Call(myrpc.AgentServiceReply, args, &ret);
 			log.Debug("<%s> user_key:\"%s\" received message : \"%s\"", addr, key, reply)
-			break
+			//break
 		}
 		end = time.Now().UnixNano()
 	}

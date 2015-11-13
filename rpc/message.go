@@ -15,9 +15,6 @@ const (
 	// group id
 	PrivateGroupId = 0
 	PublicGroupId  = 1
-	// content type
-	JsonContentType = 0
-	TextContentType  = 1
 	// message rpc service
 	MessageService             = "MessageRPC"
 	MessageServiceGetPrivate   = "MessageRPC.GetPrivate"
@@ -133,7 +130,6 @@ type MessageGetUserMsgArgs struct {
 // Message Get Response
 type MessageGetResp struct {
 	Msgs []*Message // messages
-	ContentType int // json or text
 }
 
 // watchMessageRoot watch the message root path.

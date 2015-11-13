@@ -9,7 +9,7 @@ import (
 	"net"
 	"net/rpc"
 	"encoding/json"
-	//"github.com/lucas-chi/push-service/robot"
+	"github.com/lucas-chi/push-service/robot"
 )
 
 const (
@@ -76,7 +76,7 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 	reply := &myrpc.MessageGetResp{}
 	
 	if args.NewSession {
-		//resp = robot.Welcome()
+		reply = robot.Welcome()
 	} else {
 		//reply = robot.FindReply(string(args.Msg))
 		
@@ -98,8 +98,6 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 			return err
 		}
 	}
-	
-	log.Debug("reply to session id:<%s> , response:\"%v\"", args.SessionId, reply)
 	
 	replyJson, err :=json.Marshal(reply)
 	if err != nil {

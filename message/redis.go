@@ -311,7 +311,7 @@ func (s *RedisStorage) GetUserMsg(sessionId string) ([]*myrpc.Message, error) {
 		return nil, RedisNoConnErr
 	}
 	defer conn.Close()
-	values, err := redis.Values(conn.Do("ZRANGEBYSCORE", key, "-inf +inf", "WITHSCORES"))
+	values, err := redis.Values(conn.Do("ZRANGEBYSCORE", key, "-inf", "+inf", "WITHSCORES"))
 	if err != nil {
 		log.Error("conn.Do(\"ZRANGEBYSCORE\", \"%s\", \"%d\", \"-inf +inf\", \"WITHSCORES\") error(%v)", key, err)
 		return nil, err

@@ -125,7 +125,7 @@ func (r *MessageRPC) GetUserMsg(m *myrpc.MessageGetUserMsgArgs, rw *myrpc.Messag
 		log.Error("json.Marshal(%v) error(%v)", replyJson, err)
 		return err
 	}
-	log.Debug("UserStorage.GetUserMsg(\"%s\") ok, resp <%v>", m.SessionId, string(replyJson))
+	log.Debug("UserStorage.GetUserMsg(\"%s\") ok, resp <%s>", m.SessionId, string(replyJson))
 	return nil
 }
 

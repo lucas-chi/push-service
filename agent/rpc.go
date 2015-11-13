@@ -73,7 +73,7 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 	}
 	
 	log.Debug("received from session id:<%s> , message:\"%s\"", args.SessionId, args.Msg)
-	var resp *myrpc.MessageGetResp
+	reply := &myrpc.MessageGetResp{}
 	
 	if args.NewSession {
 		//resp = robot.Welcome()
@@ -92,17 +92,16 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 		
 		// get user message
 		getArgs := &myrpc.MessageGetUserMsgArgs{SessionId: args.SessionId}
-		resp := &myrpc.MessageGetResp{}
 		
-		if err := messageClient.Call(myrpc.MessageServiceGetUserMsg, getArgs, resp); err != nil {
+		if err := messageClient.Call(myrpc.MessageServiceGetUserMsg, getArgs, reply); err != nil {
 			log.Error("client.Call(\"%s\", \"%v\", resp) error(%v)", myrpc.MessageServiceGetUserMsg, getArgs, err)
 			return err
 		}
 	}
 	
-	log.Debug("reply to session id:<%s> , resp:\"%v\"", args.SessionId, resp)
+	log.Debug("reply to session id:<%s> , response:\"%v\"", args.SessionId, reply)
 	
-	replyJson, err :=json.Marshal(resp)
+	replyJson, err :=json.Marshal(reply)
 	if err != nil {
 		log.Error("json.Marshal(%v) error(%v)", replyJson, err)
 		return err

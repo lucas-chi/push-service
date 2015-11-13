@@ -100,6 +100,8 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 		}
 	}
 	
+	log.Debug("reply to session id:<%s> , resp:\"%v\"", args.SessionId, resp)
+	
 	replyJson, err :=json.Marshal(resp)
 	if err != nil {
 		log.Error("json.Marshal(%v) error(%v)", replyJson, err)

@@ -73,10 +73,10 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 	}
 	
 	log.Debug("received from session id:<%s> , message:\"%s\"", args.SessionId, args.Msg)
-	var reply string
+	var resp *myrpc.MessageGetResp
 	
 	if args.NewSession {
-		reply = robot.Welcome()
+		resp = robot.Welcome()
 	} else {
 		//reply = robot.FindReply(string(args.Msg))
 		
@@ -92,24 +92,22 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 		
 		// get user message
 		getArgs := &myrpc.MessageGetUserMsgArgs{SessionId: args.SessionId}
-		getResp := &myrpc.MessageGetResp{}
+		resp := &myrpc.MessageGetResp{}
 		
-		if err := messageClient.Call(myrpc.MessageServiceGetUserMsg, getArgs, getResp); err != nil {
-			log.Error("client.Call(\"%s\", \"%v\", getResp) error(%v)", myrpc.MessageServiceGetUserMsg, getArgs, err)
+		if err := messageClient.Call(myrpc.MessageServiceGetUserMsg, getArgs, resp); err != nil {
+			log.Error("client.Call(\"%s\", \"%v\", resp) error(%v)", myrpc.MessageServiceGetUserMsg, getArgs, err)
 			return err
 		}
-		
-		byteJson, err :=json.Marshal(getResp)
-		if err != nil {
-			log.Error("json.Marshal(%v) error(%v)", getResp, err)
-			return err
-		}
-		
-		reply = string(byteJson)
 	}
 	
-	pushArgs := &myrpc.CometPushPrivateArgs{Msg: json.RawMessage(reply), Expire: 0, Key: args.SessionId}
-	log.Debug("reply to session id:<%s> , message:\"%s\"", args.SessionId, reply)
+	replyJson, err :=json.Marshal(resp)
+	if err != nil {
+		log.Error("json.Marshal(%v) error(%v)", replyJson, err)
+		return err
+	}
+	
+	pushArgs := &myrpc.CometPushPrivateArgs{Msg: replyJson, Expire: 0, Key: args.SessionId}
+	log.Debug("reply to session id:<%s> , message:\"%s\"", args.SessionId, replyJson)
 	
 	if err := cometClient.Call(myrpc.CometServicePushPrivate, pushArgs, &ret); err != nil {
 		log.Error("client.Call(\"%s\", \"%s\", &ret) error(%v)", myrpc.CometServicePushPrivate, pushArgs.Key, err)

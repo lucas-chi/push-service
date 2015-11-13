@@ -157,7 +157,10 @@ func SubscribeHandle(ws *websocket.Conn) {
 			log.Debug("<%s> user_key:\"%s\" receive heartbeat", addr, key)
 		} else { // reply user message
 			args := &myrpc.MessageReplyArgs{SessionId : key, Msg : json.RawMessage(reply), NewSession : false}
-			client.Call(myrpc.AgentServiceReply, args, &ret);
+			if err := client.Call(myrpc.AgentServiceReply, args, &ret); err != nil {
+				log.Error("client.Call(\"%s\", \"%v\", &ret) error(%v)", myrpc.AgentServiceReply, args, err)
+				continue;
+			}
 			log.Debug("<%s> user_key:\"%s\" received message : \"%s\"", addr, key, reply)
 			//break
 		}

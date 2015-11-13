@@ -1,7 +1,7 @@
 package robot
 
 import (
-
+	myrpc "github.com/lucas-chi/push-service/rpc"
 )
 
 const (
@@ -24,6 +24,9 @@ func FindReply(msg string) string {
 	}
 }
 
-func Welcome() string {
-	return "尊敬的用户，我将竭诚为您服务！"
+func Welcome() *myrpc.MessageGetResp {
+	msgs := make([]*myrpc.Message, 0, 1)
+	m := &myrpc.Message{MsgId: 0, Msg: []byte("尊敬的用户，我将竭诚为您服务！")}
+	msgs[0] = m
+	return &myrpc.MessageGetResp{Msgs : msgs, ContentType : myrpc.TextContentType}
 }

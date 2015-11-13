@@ -119,7 +119,7 @@ func (r *MessageRPC) GetUserMsg(m *myrpc.MessageGetUserMsgArgs, rw *myrpc.Messag
 		return err
 	}
 	rw.Msgs = msgs
-	log.Debug("UserStorage.GetUserMsg(\"%s\") ok, resp <%v>", m.SessionId, *rw)
+	log.Debug("UserStorage.GetUserMsg(\"%s\") ok, resp <%v>", m.SessionId, rw.Msgs)
 	return nil
 }
 

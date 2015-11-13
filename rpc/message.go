@@ -21,6 +21,8 @@ const (
 	MessageServiceSavePrivate  = "MessageRPC.SavePrivate"
 	MessageServiceSavePrivates = "MessageRPC.SavePrivates"
 	MessageServiceDelPrivate   = "MessageRPC.DelPrivate"
+	MessageServiceGetUserMsg   = "MessageRPC.GetUserMsg"
+	MessageServiceSaveUserMsg  = "MessageRPC.SaveUserMsg"
 )
 
 var (
@@ -110,6 +112,19 @@ type MessageSavePublishArgs struct {
 type MessageGetPrivateArgs struct {
 	MsgId int64  // message id
 	Key   string // subscriber key
+}
+
+// Message SaveUserMsg args
+type MessageSaveUserMsgArgs struct {
+	SessionId    string          // sessionId key
+	Msg    json.RawMessage // message content
+	MsgId  int64           // message id
+	Expire uint            // message expire second
+}
+
+// Message GetUserMsg args
+type MessageGetUserMsgArgs struct {
+	SessionId string  // sessionId id
 }
 
 // Message Get Response

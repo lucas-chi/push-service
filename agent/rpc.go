@@ -10,12 +10,10 @@ import (
 	"net/rpc"
 	"encoding/json"
 	"github.com/lucas-chi/push-service/robot"
-	"fmt"
 )
 
 const (
-	USERMSG_NAMESPACE string = "userMsg"
-	USERMSG_EXPIRE uint = 3600 * 10
+	userMsgExpire = 3600 * 10
 )
 
 var (
@@ -82,23 +80,22 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 	} else {
 		//reply = robot.FindReply(string(args.Msg))
 		
-		key := fmt.Sprintf("%s.%s", USERMSG_NAMESPACE, args.SessionId)
 		messageClient := myrpc.MessageRPC.Get()
 		
 		// save user message
-		saveArgs := &myrpc.MessageSavePrivateArgs{Key: key, Msg: args.Msg, MsgId: id.Get(), Expire: USERMSG_EXPIRE}
+		saveArgs := &myrpc.MessageSaveUserMsgArgs{SessionId: args.SessionId, Msg: args.Msg, MsgId: id.Get(), Expire: userMsgExpire}
 		
-		if err := messageClient.Call(myrpc.MessageServiceSavePrivate, saveArgs, &ret); err != nil {
-			log.Error("client.Call(\"%s\", \"%v\", &ret) error(%v)", myrpc.MessageServiceSavePrivate, saveArgs, err)
+		if err := messageClient.Call(myrpc.MessageServiceSaveUserMsg, saveArgs, &ret); err != nil {
+			log.Error("client.Call(\"%s\", \"%v\", &ret) error(%v)", myrpc.MessageServiceSaveUserMsg, saveArgs, err)
 			return err
 		}
 		
-		// get user message history
-		getArgs := &myrpc.MessageGetPrivateArgs{MsgId: 0, Key: key}
+		// get user message
+		getArgs := &myrpc.MessageGetUserMsgArgs{SessionId: args.SessionId}
 		getResp := &myrpc.MessageGetResp{}
 		
-		if err := messageClient.Call(myrpc.MessageServiceGetPrivate, getArgs, getResp); err != nil {
-			log.Error("client.Call(\"%s\", \"%v\", getResp) error(%v)", myrpc.MessageServiceGetPrivate, getArgs, err)
+		if err := messageClient.Call(myrpc.MessageServiceGetUserMsg, getArgs, getResp); err != nil {
+			log.Error("client.Call(\"%s\", \"%v\", getResp) error(%v)", myrpc.MessageServiceGetUserMsg, getArgs, err)
 			return err
 		}
 		

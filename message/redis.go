@@ -11,10 +11,16 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
+const (
+	userMsgNamespace string = "userMsg"
+	userMsgExpire uint = 3600 * 10
+)
+
 var (
 	RedisNoConnErr       = errors.New("can't get a redis conn")
 	redisProtocolSpliter = "@"
 )
+
 
 // RedisMessage struct encoding the composite info.
 type RedisPrivateMessage struct {
@@ -257,6 +263,94 @@ func (s *RedisStorage) clean() {
 		}
 		conn.Close()
 	}
+}
+
+// SavePrivate implements the Storage SaveUserMsg method.
+func (s *RedisStorage) SaveUserMsg(sessionId string, msg json.RawMessage, mid int64, expire uint) error {
+	key := fmt.Sprintf("%s.%s", userMsgNamespace, sessionId)
+	rm := &RedisPrivateMessage{Msg: msg, Expire: int64(expire) + time.Now().Unix()}
+	m, err := json.Marshal(rm)
+	if err != nil {
+		log.Error("json.Marshal() key:\"%s\" error(%v)", key, err)
+		return err
+	}
+	conn := s.getConn()
+	if conn == nil {
+		return RedisNoConnErr
+	}
+	defer conn.Close()
+	
+	if err = conn.Send("ZADD", key, mid, m); err != nil {
+		log.Error("conn.Send(\"ZADD\", \"%s\", %d, \"%s\") error(%v)", key, mid, string(m), err)
+		return err
+	}
+	if err = conn.Send("ZREMRANGEBYRANK", key, 0, -1*(Conf.RedisMaxStore+1)); err != nil {
+		log.Error("conn.Send(\"ZREMRANGEBYRANK\", \"%s\", 0, %d) error(%v)", key, -1*(Conf.RedisMaxStore+1), err)
+		return err
+	}
+	if err = conn.Flush(); err != nil {
+		log.Error("conn.Flush() error(%v)", err)
+		return err
+	}
+	if _, err = conn.Receive(); err != nil {
+		log.Error("conn.Receive() error(%v)", err)
+		return err
+	}
+	if _, err = conn.Receive(); err != nil {
+		log.Error("conn.Receive() error(%v)", err)
+		return err
+	}
+	return nil
+}
+
+// GetUserMsg implements the Storage GetUserMsg method.
+func (s *RedisStorage) GetUserMsg(sessionId string) ([]*myrpc.Message, error) {
+	key := fmt.Sprintf("%s.%s", userMsgNamespace, sessionId)
+	conn := s.getConn()
+	if conn == nil {
+		return nil, RedisNoConnErr
+	}
+	defer conn.Close()
+	values, err := redis.Values(conn.Do("ZRANGEBYSCORE", key, "-inf +inf", "WITHSCORES"))
+	if err != nil {
+		log.Error("conn.Do(\"ZRANGEBYSCORE\", \"%s\", \"%d\", \"-inf +inf\", \"WITHSCORES\") error(%v)", key, err)
+		return nil, err
+	}
+	msgs := make([]*myrpc.Message, 0, len(values))
+	delMsgs := []int64{}
+	now := time.Now().Unix()
+	for len(values) > 0 {
+		cmid := int64(0)
+		b := []byte{}
+		values, err = redis.Scan(values, &b, &cmid)
+		if err != nil {
+			log.Error("redis.Scan() error(%v)", err)
+			return nil, err
+		}
+		rm := &RedisPrivateMessage{}
+		if err = json.Unmarshal(b, rm); err != nil {
+			log.Error("json.Unmarshal(\"%s\", rm) error(%v)", string(b), err)
+			delMsgs = append(delMsgs, cmid)
+			continue
+		}
+		// check expire
+		if rm.Expire < now {
+			log.Warn("user_key: \"%s\" msg: %d expired", key, cmid)
+			delMsgs = append(delMsgs, cmid)
+			continue
+		}
+		m := &myrpc.Message{MsgId: cmid, Msg: rm.Msg}
+		msgs = append(msgs, m)
+	}
+	// delete unmarshal failed and expired message
+	if len(delMsgs) > 0 {
+		select {
+		case s.delCH <- &RedisDelMessage{Key: key, MIds: delMsgs}:
+		default:
+			log.Warn("user_key: \"%s\" send del messages failed, channel full", key)
+		}
+	}
+	return msgs, nil
 }
 
 // getConn get the connection

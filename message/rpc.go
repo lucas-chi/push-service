@@ -94,6 +94,35 @@ func (r *MessageRPC) DelPrivate(key string, ret *int) error {
 	return nil
 }
 
+// SaveUserMsg rpc interface save user message.
+func (r *MessageRPC) SaveUserMsg(m *myrpc.MessageSaveUserMsgArgs, ret *int) error {
+	if m == nil || m.Msg == nil || m.MsgId < 0 {
+		return myrpc.ErrParam
+	}
+	if err := UseStorage.SaveUserMsg(m.SessionId, m.Msg, m.MsgId, m.Expire); err != nil {
+		log.Error("UseStorage.SaveUserMsg(\"%s\", \"%s\", %d, %d) error(%v)", m.SessionId, string(m.Msg), m.MsgId, m.Expire, err)
+		return err
+	}
+	log.Debug("UseStorage.SaveUserMsg(\"%s\", \"%s\", %d, %d) ok", m.SessionId, string(m.Msg), m.MsgId, m.Expire)
+	return nil
+}
+
+// GetUserMsg rpc interface get user private message.
+func (r *MessageRPC) GetUserMsg(m *myrpc.MessageGetUserMsgArgs, rw *myrpc.MessageGetResp) error {
+	log.Debug("messageRPC.GetUserMsg key:\"%s\"", m.SessionId)
+	if m == nil || m.SessionId == "" {
+		return myrpc.ErrParam
+	}
+	msgs, err := UseStorage.GetUserMsg(m.SessionId)
+	if err != nil {
+		log.Error("UseStorage.GetUserMsg(\"%s\") error(%v)", m.SessionId, err)
+		return err
+	}
+	rw.Msgs = msgs
+	log.Debug("UserStorage.GetUserMsg(\"%s\") ok", m.SessionId)
+	return nil
+}
+
 // Server Ping interface
 func (r *MessageRPC) Ping(p int, ret *int) error {
 	log.Debug("ping ok")

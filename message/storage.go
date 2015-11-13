@@ -28,6 +28,11 @@ type Storage interface {
 	SavePrivates(keys []string, msg json.RawMessage, mid int64, expire uint) error
 	// DelPrivate delete private msgs.
 	DelPrivate(key string) error
+	// GetUserMsg get user msgs.
+	GetUserMsg(sessionId string) ([]*rpc.Message, error)
+	// SaveUserMsg Save single user msg.
+	SaveUserMsg(sessionId string, msg json.RawMessage, mid int64, expire uint) error
+	
 }
 
 // InitStorage init the storage type(mysql or redis).

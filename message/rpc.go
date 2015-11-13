@@ -6,6 +6,7 @@ import (
 	myrpc "github.com/lucas-chi/push-service/rpc"
 	"net"
 	"net/rpc"
+	"encoding/json"
 )
 
 // RPC For receive offline messages
@@ -119,7 +120,12 @@ func (r *MessageRPC) GetUserMsg(m *myrpc.MessageGetUserMsgArgs, rw *myrpc.Messag
 		return err
 	}
 	rw.Msgs = msgs
-	log.Debug("UserStorage.GetUserMsg(\"%s\") ok, resp <%v>", m.SessionId, rw.Msgs)
+	replyJson, err :=json.Marshal(rw)
+	if err != nil {
+		log.Error("json.Marshal(%v) error(%v)", replyJson, err)
+		return err
+	}
+	log.Debug("UserStorage.GetUserMsg(\"%s\") ok, resp <%v>", m.SessionId, replyJson)
 	return nil
 }
 

@@ -9,7 +9,7 @@ import (
 	"net"
 	"net/rpc"
 	"encoding/json"
-	"github.com/lucas-chi/push-service/robot"
+	//"github.com/lucas-chi/push-service/robot"
 )
 
 const (
@@ -73,10 +73,10 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 	}
 	
 	log.Debug("received from session id:<%s> , message:\"%s\"", args.SessionId, args.Msg)
-	var resp *myrpc.MessageGetResp
+	var resp
 	
 	if args.NewSession {
-		resp = robot.Welcome()
+		//resp = robot.Welcome()
 	} else {
 		//reply = robot.FindReply(string(args.Msg))
 		
@@ -108,8 +108,8 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 		return err
 	}
 	
-	pushArgs := &myrpc.CometPushPrivateArgs{Msg: replyJson, Expire: 0, Key: args.SessionId}
-	log.Debug("reply to session id:<%s> , message:\"%s\"", args.SessionId, replyJson)
+	pushArgs := &myrpc.CometPushPrivateArgs{Msg: json.RawMessage(replyJson), Expire: 0, Key: args.SessionId}
+	log.Debug("reply to session id:<%s> , message:\"%s\"", args.SessionId, string(replyJson))
 	
 	if err := cometClient.Call(myrpc.CometServicePushPrivate, pushArgs, &ret); err != nil {
 		log.Error("client.Call(\"%s\", \"%s\", &ret) error(%v)", myrpc.CometServicePushPrivate, pushArgs.Key, err)

@@ -73,7 +73,7 @@ func (c *AgentRPC) ReplyMessage(args *myrpc.MessageReplyArgs, ret *int) error {
 	}
 	
 	log.Debug("received from session id:<%s> , message:\"%s\"", args.SessionId, args.Msg)
-	var resp
+	var resp *myrpc.MessageGetResp
 	
 	if args.NewSession {
 		//resp = robot.Welcome()

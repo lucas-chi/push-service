@@ -25,7 +25,7 @@ func FindReply(msg string) string {
 }
 
 func Welcome() *myrpc.MessageGetResp {
-	msgs := make([]*myrpc.Message, 0, 1)
+	msgs := make([]*myrpc.Message, 1)
 	m := &myrpc.Message{MsgId: 0, Msg: []byte("尊敬的用户，我将竭诚为您服务！")}
 	msgs[0] = m
 	return &myrpc.MessageGetResp{Msgs : msgs, ContentType : myrpc.TextContentType}
